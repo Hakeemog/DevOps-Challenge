@@ -52,10 +52,10 @@ resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.subnet-1.id
   route_table_id = aws_route_table.prod-route-table.id
 }
-#Create a security group
-resource "aws_security_group" "allow_web" {
-  name        = "allow_web_traffic"
-  description = "Allow web inbound traffic"
+#Create a public security group for load balancer
+resource "aws_security_group" "public_SG{
+  name        = "public_SG"
+  description = "Public SG for ALB"
   vpc_id      = aws_vpc.prod_vpc.id
 
   ingress {
@@ -89,9 +89,31 @@ resource "aws_security_group" "allow_web" {
   }
 
   tags = {
-    Name = "allow_web"
+    Name = "ALB_SG"
   }
 }
+
+#Create a private security group for EC2 instances
+resource "aws_security_group" "private_SG{
+  name        = "private_SG"
+  description = "Private SG for ec2 instance"
+  vpc_id      = aws_vpc.prod_vpc.id
+
+  ingress {
+    description      = "HTTP"
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    security_group_id      = "aws_security_group_public_SG.id
+    
+    egress {
+    from_port        = 80
+    to_port          = 80
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  }
 # Create network interface with an IP in the subnet
 resource "aws_network_interface" "web_server_nic" {
   subnet_id       = aws subnet.subnet-1.id
