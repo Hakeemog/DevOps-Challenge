@@ -33,8 +33,8 @@ resource "aws_internet_gateway" "gw" {
 
   tags = {
     Name = "prod"
+   }
   }
-}
 }
 
 # Create subnet
@@ -177,7 +177,7 @@ resource "aws_instance" "app_server_instance" {
 }
 #Create application load balancer
 resource "aws_lb" "main-lb" {
-  name               = "main_lb"
+  name               = "main-lb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group_public_SG.id]
@@ -185,11 +185,29 @@ resource "aws_lb" "main-lb" {
 
   enable_deletion_protection = true
 
-  access_logs {
-    bucket  = aws_s3_bucket.lb_logs.bucket
-    prefix  = "main-lb"
-    enabled = true
+#Create application load balancer target group
+resource "aws_lb_target_group" "app_http_tg" {
+  name     = "app_http_tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.prod_vpc.id
+}
+
+#Create application load balancer listener
+
+resource "aws_lb_listener" "http_listener_80" {
+  load_balancer_arn = aws_lb.main-lb.arn
+  port              = "80"
+  protocol          = "HTTP"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.app_http_tg.arn
   }
+}
+  
 
   tags = {
     Environment = "production"
