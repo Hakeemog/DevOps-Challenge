@@ -104,7 +104,7 @@ resource "aws_security_group" "private_SG{
     from_port        = 80
     to_port          = 80
     protocol         = "tcp"
-    security_group_id      = "aws_security_group_public_SG.id
+    security_group_id      = "aws_security_group_public_SG.id"
     
     egress {
     from_port        = 80
@@ -118,7 +118,7 @@ resource "aws_security_group" "private_SG{
 resource "aws_network_interface" "web_server_nic" {
   subnet_id       = aws subnet.subnet-1.id
   private_ips     = ["10.0.1.50"]
-  security_groups = [aws_security_group.allow_web.id]
+  security_groups = [aws_security_group.private_SG.id]
 }
 #Create an elastic IP to the network
 resource "aws_eip" "one" {
@@ -177,11 +177,11 @@ resource "aws_instance" "app_server_instance" {
 }
 #Create application load balancer
 resource "aws_lb" "main-lb" {
-  name               = "main-lb-tf"
+  name               = "main_lb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.lb_sg.id]
-  subnets            = aws_subnet.public.*.id 
+  security_groups    = [aws_security_group_public_SG.id]
+  subnets            = aws_subnet.subnet-1_id
 
   enable_deletion_protection = true
 
