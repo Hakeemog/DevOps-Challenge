@@ -183,8 +183,9 @@ module "db" {
   engine_version = "11.9"
   instance_type  = "db.r5.large"
 
-  vpc_id  = "vpc-12345678"
-  subnets = ["subnet-12345678", "subnet-87654321"]
+  vpc_id  = "aws_vpc.prod_vpc.id"
+
+  subnets = ["subnet-12345678", "subnet-87654321"]  
 
   replica_count           = 1
   allowed_security_groups = ["sg-12345678"]
