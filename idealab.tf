@@ -37,7 +37,7 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
-# Create subnet
+# Create public subnet
 resource "aws_subnet" "subnet-1" {
   vpc_id = aws_vpc.prod_vpc.id
   cidr_block = "10.0.1.0/24"
@@ -51,6 +51,23 @@ resource "aws_subnet" "subnet-1" {
 resource "aws_route_table_association" "a" {
   subnet_id      = aws_subnet.subnet-1.id
   route_table_id = aws_route_table.prod-route-table.id
+}
+# Create private subnet 
+resource "aws_subnet" "subnet-2" {
+  vpc_id                  = aws_vpc.prod_vpc.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "us-east-1b"
+  tags = {
+    Name        =  "prods_Subnet"
+  }
+}
+# Create routing table for private subnet 
+resource "aws_route_table" "private" {
+  vpc_id = "aws_vpc.vpc.id"
+  tags = {
+    Name        = "private-route-table"
+    
+  }
 }
 #Create a public security group for load balancer
 resource "aws_security_group" "public_SG{
@@ -156,7 +173,7 @@ resource "aws_instance" "web_server_instance" {
 resource "aws_instance" "app_server_instance" {
   ami           = "ami-042e8287309f5df03" 
   instance_type = "t2.micro"
-  availability_zone = "us-east-1a"
+  availability_zone = "us-east-1a, us-east-1b"
   instance_count = "2"
   Key_name = "main_key"
 
@@ -216,7 +233,7 @@ module "db" {
   source  = "terraform-aws-modules/rds-aurora/aws"
   version = "~> 3.0"
 
-  name           = "test-aurora-db-postgres96"
+  name           = "prod-aurora-db-postgres96"
   engine         = "aurora-postgresql"
   engine_version = "11.9"
   instance_type  = "db.r5.large"
@@ -239,7 +256,7 @@ module "db" {
   enabled_cloudwatch_logs_exports = ["postgresql"]
 
   tags = {
-    Environment = "dev"
+    Environment = "prod"
     Terraform   = "true"
   }
 }
