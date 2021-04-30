@@ -199,9 +199,7 @@ resource "aws_lb_listener" "http_listener_80" {
   load_balancer_arn = aws_lb.main-lb.arn
   port              = "80"
   protocol          = "HTTP"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
   
-
   default_action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.app_http_tg.arn
